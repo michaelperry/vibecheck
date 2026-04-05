@@ -8,7 +8,7 @@ enum KeychainHelper {
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrAccount as String: key,
-            kSecAttrService as String: "com.michaelperry.VibeCheck",
+            kSecAttrService as String: "com.michaelperry.VibeWars",
         ]
         // Delete any existing item first
         SecItemDelete(query as CFDictionary)
@@ -24,7 +24,7 @@ enum KeychainHelper {
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrAccount as String: key,
-            kSecAttrService as String: "com.michaelperry.VibeCheck",
+            kSecAttrService as String: "com.michaelperry.VibeWars",
             kSecReturnData as String: true,
             kSecMatchLimit as String: kSecMatchLimitOne,
         ]

@@ -1,4 +1,4 @@
--- VibeCheck Supabase Schema
+-- VibeWars Supabase Schema
 -- Run this in the Supabase SQL Editor after creating your project
 
 -- Score entries table

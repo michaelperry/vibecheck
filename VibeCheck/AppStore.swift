@@ -107,7 +107,7 @@ class AppStore: ObservableObject {
             if !legacy.isEmpty {
                 self.githubToken = legacy
                 KeychainHelper.save(legacy, for: "githubToken")
-                print("VibeCheck: Migrated GitHub token to Keychain")
+                print("VibeWars: Migrated GitHub token to Keychain")
             }
         }
         if self.claudeApiKey.isEmpty {
@@ -115,12 +115,12 @@ class AppStore: ObservableObject {
             if !legacy.isEmpty {
                 self.claudeApiKey = legacy
                 KeychainHelper.save(legacy, for: "claudeApiKey")
-                print("VibeCheck: Migrated Claude API key to Keychain")
+                print("VibeWars: Migrated Claude API key to Keychain")
             }
         }
 
-        print("VibeCheck: Init — GitHub token: \(githubToken.isEmpty ? "EMPTY" : "set (\(githubToken.prefix(4))...)"), username: \(githubUsername)")
-        print("VibeCheck: Real home: \(RealHome.path)")
+        print("VibeWars: Init — GitHub token: \(githubToken.isEmpty ? "EMPTY" : "set (\(githubToken.prefix(4))...)"), username: \(githubUsername)")
+        print("VibeWars: Real home: \(RealHome.path)")
 
         loadPersistedData()
         scheduleRefresh()
@@ -191,7 +191,7 @@ class AppStore: ObservableObject {
                 UserDefaults.standard.set(weekly.rank, forKey: "prevWeeklyRank_\(weeklyKey)")
             }
         } catch {
-            print("VibeCheck: Ranking error: \(error.localizedDescription)")
+            print("VibeWars: Ranking error: \(error.localizedDescription)")
         }
     }
 
@@ -352,9 +352,9 @@ class AppStore: ObservableObject {
             let (data, response) = try await URLSession.shared.data(for: request)
             guard let http = response as? HTTPURLResponse else { return }
 
-            print("VibeCheck: Claude API status \(http.statusCode)")
+            print("VibeWars: Claude API status \(http.statusCode)")
             let rawStr = String(data: data, encoding: .utf8) ?? ""
-            print("VibeCheck: Claude API response: \(rawStr.prefix(300))")
+            print("VibeWars: Claude API response: \(rawStr.prefix(300))")
 
             if http.statusCode == 200 {
                 if let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
@@ -463,7 +463,7 @@ class AppStore: ObservableObject {
             return val
         }
         // Sandbox container location (from when app ran sandboxed)
-        let containerPlist = RealHome.appending("Library/Containers/com.michaelperry.VibeCheck/Data/Library/Preferences/com.michaelperry.VibeCheck.plist")
+        let containerPlist = RealHome.appending("Library/Containers/com.michaelperry.VibeWars/Data/Library/Preferences/com.michaelperry.VibeWars.plist")
         if let dict = NSDictionary(contentsOf: containerPlist),
            let val = dict[key] as? String, !val.isEmpty {
             return val

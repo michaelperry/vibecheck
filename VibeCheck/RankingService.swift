@@ -52,7 +52,7 @@ actor RankingService {
     /// This never leaves the device as a raw identifier — only the hash is sent.
     private func getAnonymousID() -> String {
         // Check for cached ID first
-        if let cached = UserDefaults.standard.string(forKey: "vibecheck_anon_id") {
+        if let cached = UserDefaults.standard.string(forKey: "vibewars_anon_id") {
             return cached
         }
 
@@ -60,12 +60,12 @@ actor RankingService {
         let platform = ProcessInfo.processInfo.environment["__CF_USER_TEXT_ENCODING"]
             ?? UUID().uuidString
         let machineID = Host.current().name ?? UUID().uuidString
-        let raw = "vibecheck_2026_\(platform)_\(machineID)"
+        let raw = "vibewars_2026_\(platform)_\(machineID)"
 
         let hash = SHA256.hash(data: Data(raw.utf8))
         let anonymousID = hash.prefix(16).map { String(format: "%02x", $0) }.joined()
 
-        UserDefaults.standard.set(anonymousID, forKey: "vibecheck_anon_id")
+        UserDefaults.standard.set(anonymousID, forKey: "vibewars_anon_id")
         return anonymousID
     }
 
@@ -96,7 +96,7 @@ actor RankingService {
 
         guard http.statusCode == 200 else {
             let msg = String(data: data, encoding: .utf8) ?? "Unknown error"
-            print("VibeCheck: Supabase error \(http.statusCode): \(msg)")
+            print("VibeWars: Supabase error \(http.statusCode): \(msg)")
             throw RankingError.serverError(http.statusCode, msg)
         }
 
@@ -124,10 +124,10 @@ actor RankingService {
         do {
             let (_, response) = try await URLSession.shared.data(for: request)
             let code = (response as? HTTPURLResponse)?.statusCode ?? 0
-            print("VibeCheck: Supabase health check: \(code)")
+            print("VibeWars: Supabase health check: \(code)")
             return code == 200
         } catch {
-            print("VibeCheck: Supabase health check failed: \(error.localizedDescription)")
+            print("VibeWars: Supabase health check failed: \(error.localizedDescription)")
             return false
         }
     }

@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VibeCheck — Know your vibe. Own the leaderboard.</title>
-    <meta name="description" content="A macOS menu bar app that tracks your developer productivity across GitHub, Claude Code, Codex, Cursor, and Copilot. See where you rank against every other vibe coder.">
+    <title>VibeWars — Know your rank. Own the leaderboard.</title>
+    <meta name="description" content="The developer leaderboard for vibe coders. A macOS menu bar app that tracks your output across GitHub, Claude Code, Codex, Cursor, and Copilot — then ranks you against every other dev in the arena.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -351,23 +351,23 @@
             <div class="terminal-dot red"></div>
             <div class="terminal-dot yellow"></div>
             <div class="terminal-dot green"></div>
-            <div class="terminal-title">vibecheck &mdash; zsh</div>
+            <div class="terminal-title">vibewars &mdash; zsh</div>
             <div style="width: 52px"></div>
         </div>
         <div class="terminal-body">
-            <div class="line"><span class="prompt">~</span> <span class="cmd">vibecheck</span> <span class="flag">--status</span></div>
+            <div class="line"><span class="prompt">~</span> <span class="cmd">vibewars</span> <span class="flag">--status</span></div>
             <div class="line"><br></div>
-            <div class="line"><span class="fire">🔥 Cooking</span> <span class="comment">— you're absolutely ripping today</span></div>
+            <div class="line"><span class="fire">&#9876; Dominating</span> <span class="comment">&mdash; you're on a warpath today</span></div>
             <div class="line"><br></div>
-            <div class="line"><span class="comment">  github</span>    <span class="output">14 commits today</span>  <span class="comment">·</span>  <span class="output">47 this week</span>  <span class="comment">·</span>  <span class="success">12d streak</span></div>
-            <div class="line"><span class="comment">  claude</span>    <span class="output">142.8K tokens</span>   <span class="comment">·</span>  <span class="output">38 messages</span>  <span class="comment">·</span>  <span class="output">6 sessions</span></div>
-            <div class="line"><span class="comment">  codex</span>     <span class="output">51.2K tokens</span>    <span class="comment">·</span>  <span class="output">12 messages</span></div>
+            <div class="line"><span class="comment">  github</span>    <span class="output">14 commits today</span>  <span class="comment">&middot;</span>  <span class="output">47 this week</span>  <span class="comment">&middot;</span>  <span class="success">12d streak</span></div>
+            <div class="line"><span class="comment">  claude</span>    <span class="output">142.8K tokens</span>   <span class="comment">&middot;</span>  <span class="output">38 messages</span>  <span class="comment">&middot;</span>  <span class="output">6 sessions</span></div>
+            <div class="line"><span class="comment">  codex</span>     <span class="output">51.2K tokens</span>    <span class="comment">&middot;</span>  <span class="output">12 messages</span></div>
             <div class="line"><br></div>
             <div class="line"><span class="comment">  vibescore</span> <span class="value" style="font-size:16px; font-weight:700;">78</span><span class="comment">/100</span></div>
-            <div class="line"><span class="comment">  rank</span>      <span class="success">#40</span> <span class="comment">of 1,204</span>  <span class="comment">·</span>  <span class="value">Top 3%</span></div>
-            <div class="line"><span class="comment">  </span><span class="success">↑ You moved up 2 spots today</span></div>
+            <div class="line"><span class="comment">  rank</span>      <span class="success">#40</span> <span class="comment">of 1,204</span>  <span class="comment">&middot;</span>  <span class="value">Top 3%</span></div>
+            <div class="line"><span class="comment">  </span><span class="success">&#8593; You climbed 2 ranks today</span></div>
             <div class="line"><br></div>
-            <div class="line"><span class="comment">  outvibing</span> <span class="value">97% of developers</span> <span class="comment">today</span></div>
+            <div class="line"><span class="comment">  defeating</span> <span class="value">97% of developers</span> <span class="comment">today</span></div>
             <div class="line"><br></div>
             <div class="line"><span class="prompt">~</span> <span class="cursor-blink"></span></div>
         </div>
@@ -375,12 +375,13 @@
 
     <!-- What is it -->
     <div class="section">
-        <h2>What is VibeCheck</h2>
+        <h2>What is VibeWars</h2>
         <p style="color: var(--dim); font-size: 14px; max-width: 600px; line-height: 1.8;">
-            A macOS menu bar app that tracks your coding activity across GitHub and AI tools,
-            computes a daily VibeScore, and ranks you anonymously against every other developer using it.
+            The developer leaderboard for vibe coders. A macOS menu bar app that tracks your coding output
+            across GitHub and AI tools, computes a daily VibeScore, and ranks you against every other
+            developer in the arena.
             <br><br>
-            Think Strava, but for vibe coding.
+            Think Strava, but for vibe coding &mdash; and everyone's racing.
         </p>
     </div>
 
@@ -389,22 +390,22 @@
         <h2>Features</h2>
         <div class="features">
             <div class="feature">
-                <div class="emoji">📊</div>
+                <div class="emoji">&#9876;</div>
                 <h3>VibeScore 0&ndash;100</h3>
                 <p>Composite score from commits, AI usage, streaks, and tool diversity. Capped inputs prevent gaming.</p>
             </div>
             <div class="feature">
-                <div class="emoji">🏆</div>
-                <h3>Anonymous Leaderboard</h3>
-                <p>See your daily and weekly rank. "You moved up 3 spots" / "Outvibing 97% of devs today."</p>
+                <div class="emoji">&#127942;</div>
+                <h3>Global Leaderboard</h3>
+                <p>See your daily and weekly rank. "You climbed 3 ranks" / "Defeating 97% of devs today."</p>
             </div>
             <div class="feature">
-                <div class="emoji">🔍</div>
+                <div class="emoji">&#128269;</div>
                 <h3>Zero Config Detection</h3>
                 <p>Reads local files automatically. No API keys needed for AI tools. Just install and go.</p>
             </div>
             <div class="feature">
-                <div class="emoji">🔒</div>
+                <div class="emoji">&#128274;</div>
                 <h3>Privacy First</h3>
                 <p>Only a single number (your score) leaves your machine. No code, no prompts, no usernames.</p>
             </div>
@@ -443,22 +444,22 @@
         <h2>Supported Tools</h2>
         <div class="tools-grid">
             <div class="tool">
-                <div class="icon">🟣</div>
+                <div class="icon">&#128995;</div>
                 <div class="name">Claude Code</div>
                 <div class="status">auto-detected</div>
             </div>
             <div class="tool">
-                <div class="icon">🟢</div>
+                <div class="icon">&#128994;</div>
                 <div class="name">Codex</div>
                 <div class="status">auto-detected</div>
             </div>
             <div class="tool">
-                <div class="icon">🔵</div>
+                <div class="icon">&#128309;</div>
                 <div class="name">Cursor</div>
                 <div class="status">auto-detected</div>
             </div>
             <div class="tool">
-                <div class="icon">⚫</div>
+                <div class="icon">&#9899;</div>
                 <div class="name">Copilot</div>
                 <div class="status">auto-detected</div>
             </div>
@@ -492,7 +493,7 @@
         </a>
         <div class="download-note">macOS 13+ &middot; Apple Silicon & Intel</div>
         <div class="or-brew">
-            or &nbsp; <code>brew install --cask vibecheck</code> &nbsp; <span style="color: var(--dim);">(coming soon)</span>
+            or &nbsp; <code>brew install --cask vibewars</code> &nbsp; <span style="color: var(--dim);">(coming soon)</span>
         </div>
     </div>
 
@@ -507,6 +508,8 @@
         </div>
         <div class="footer-note">
             <a href="https://github.com/michaelperry/vibecheck" style="color: #333; text-decoration: none;">github.com/michaelperry/vibecheck</a>
+            &nbsp;&middot;&nbsp;
+            <a href="https://vibewars.dev" style="color: #333; text-decoration: none;">vibewars.dev</a>
         </div>
     </footer>
 
