@@ -4,6 +4,7 @@ struct MenuBarLabel: View {
     @EnvironmentObject var store: AppStore
 
     var body: some View {
+        let vibe = ScoreEngine.vibeState(from: store.vibeScore)
         HStack(spacing: 6) {
             Text(vibe.emoji)
                 .font(.system(size: 13))
@@ -26,32 +27,9 @@ struct MenuBarLabel: View {
                     .font(.system(size: 11))
                 Text("\(store.currentStreak)d")
                     .font(.system(size: 11, weight: .medium))
-                    .foregroundColor(Color(hex: "#EF9F27"))
+                    .foregroundColor(.vibeOrange)
             }
         }
         .padding(.horizontal, 4)
     }
-
-    var vibe: VibeState {
-        let commits = store.commitsToday
-        let streak = store.currentStreak
-        let hasTokens = (store.claudeInputTokensToday + store.claudeOutputTokensToday) > 0
-
-        var score = commits
-        if streak >= 3 { score += 2 }
-        if streak >= 7 { score += 3 }
-        if hasTokens { score += 2 }
-
-        switch score {
-        case 0:
-            return VibeState(emoji: "👻", label: "Ghost mode", subtitle: "No activity yet — get after it", color: Color(hex: "#888780"))
-        case 1...3:
-            return VibeState(emoji: "🌊", label: "Coasting", subtitle: "Light day so far, warming up", color: Color(hex: "#1D9E75"))
-        case 4...9:
-            return VibeState(emoji: "🔒", label: "Locked in", subtitle: "Solid progress, keep the momentum", color: Color(hex: "#7F77DD"))
-        default:
-            return VibeState(emoji: "🔥", label: "Cooking", subtitle: "You're absolutely ripping today", color: Color(hex: "#EF9F27"))
-        }
-    }
 }
-

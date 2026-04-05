@@ -18,4 +18,9 @@ extension Color {
         let b = Double(rgbValue & 0x0000FF) / 255.0
         self.init(red: r, green: g, blue: b)
     }
+
+    static let vibeGray = Color(hex: "#888780")
+    static let vibeGreen = Color(hex: "#1D9E75")
+    static let vibePurple = Color(hex: "#7F77DD")
+    static let vibeOrange = Color(hex: "#EF9F27")
 }

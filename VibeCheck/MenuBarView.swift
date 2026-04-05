@@ -4,25 +4,7 @@ struct MenuBarView: View {
     @EnvironmentObject var store: AppStore
 
     private var vibe: VibeState {
-        let commits = store.commitsToday
-        let streak = store.currentStreak
-        let hasTokens = (store.claudeInputTokensToday + store.claudeOutputTokensToday) > 0
-
-        var score = commits
-        if streak >= 3 { score += 2 }
-        if streak >= 7 { score += 3 }
-        if hasTokens { score += 2 }
-
-        switch score {
-        case 0:
-            return VibeState(emoji: "👻", label: "Ghost mode", subtitle: "No activity yet — get after it", color: Color(hex: "#888780"))
-        case 1...3:
-            return VibeState(emoji: "🌊", label: "Coasting", subtitle: "Light day so far, warming up", color: Color(hex: "#1D9E75"))
-        case 4...9:
-            return VibeState(emoji: "🔒", label: "Locked in", subtitle: "Solid progress, keep the momentum", color: Color(hex: "#7F77DD"))
-        default:
-            return VibeState(emoji: "🔥", label: "Cooking", subtitle: "You're absolutely ripping today", color: Color(hex: "#EF9F27"))
-        }
+        ScoreEngine.vibeState(from: store.vibeScore)
     }
 
     var body: some View {
@@ -85,6 +67,45 @@ struct MenuBarView: View {
                     StatBox(label: "Today", value: formatTokens(store.claudeInputTokensToday + store.claudeOutputTokensToday))
                     StatBox(label: "Cost Today", value: String(format: "$%.2f", store.claudeCostToday))
                     StatBox(label: "Cost Week", value: String(format: "$%.2f", store.claudeCostWeek))
+                }
+            }
+
+            Divider()
+
+            // VibeScore & Rankings
+            VStack(alignment: .leading, spacing: 6) {
+                Text("VibeScore")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                    .textCase(.uppercase)
+
+                HStack {
+                    StatBox(label: "Score", value: "\(store.vibeScore.rounded)")
+                    if let ranking = store.dailyRanking {
+                        StatBox(label: "Rank", value: "#\(ranking.rank)")
+                        StatBox(label: "Percentile", value: ranking.percentileText)
+                    } else {
+                        StatBox(label: "Rank", value: "—")
+                        StatBox(label: "Percentile", value: "—")
+                    }
+                }
+
+                if let ranking = store.dailyRanking {
+                    Text(ranking.subtitle)
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+
+                    if ranking.percentile >= 90 && ranking.total >= 10 {
+                        Text("You are outvibing \(Int(ranking.percentile.rounded()))% of people today")
+                            .font(.caption)
+                            .foregroundColor(.vibeOrange)
+                    }
+                }
+
+                if !store.iCloudAvailable && store.rankingsEnabled {
+                    Text("Sign into iCloud to join rankings")
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
                 }
             }
 

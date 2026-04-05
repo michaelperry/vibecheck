@@ -36,15 +36,39 @@ class AppStore: ObservableObject {
     @Published var claudeError: String? = nil
     @Published var lastUpdated: Date? = nil
 
+    // Scoring & Rankings
+    @Published var vibeScore: VibeScore = ScoreEngine.calculate(commits: 0, providers: [], streak: 0)
+    @Published var dailyRanking: RankingResult? = nil
+    @Published var weeklyRanking: RankingResult? = nil
+    @Published var rankingsEnabled: Bool {
+        didSet { UserDefaults.standard.set(rankingsEnabled, forKey: "rankingsEnabled") }
+    }
+    @Published var iCloudAvailable: Bool = false
+
+    var activityProviders: [ActivityProvider] {
+        var providers: [ActivityProvider] = []
+        if claudeInputTokensToday + claudeOutputTokensToday > 0 {
+            providers.append(ClaudeProvider(
+                todayTokens: claudeInputTokensToday + claudeOutputTokensToday,
+                weekTokens: claudeInputTokensWeek + claudeOutputTokensWeek
+            ))
+        }
+        return providers
+    }
+
     private var refreshTimer: Timer?
 
     init() {
         self.githubToken = UserDefaults.standard.string(forKey: "githubToken") ?? ""
         self.claudeApiKey = UserDefaults.standard.string(forKey: "claudeApiKey") ?? ""
         self.githubUsername = UserDefaults.standard.string(forKey: "githubUsername") ?? ""
+        self.rankingsEnabled = UserDefaults.standard.object(forKey: "rankingsEnabled") as? Bool ?? true
         loadPersistedData()
         scheduleRefresh()
-        Task { await refreshAll() }
+        Task {
+            await checkiCloudStatus()
+            await refreshAll()
+        }
     }
 
     func refreshAll() async {
@@ -52,7 +76,63 @@ class AppStore: ObservableObject {
             group.addTask { await self.fetchGitHub() }
             group.addTask { await self.fetchClaudeUsage() }
         }
-        await MainActor.run { self.lastUpdated = Date() }
+        await MainActor.run {
+            self.vibeScore = ScoreEngine.calculate(
+                commits: self.commitsToday,
+                providers: self.activityProviders,
+                streak: self.currentStreak
+            )
+            self.lastUpdated = Date()
+        }
+        if rankingsEnabled && iCloudAvailable {
+            await submitAndFetchRankings()
+        }
+    }
+
+    private func checkiCloudStatus() async {
+        let available = await RankingService.shared.isAvailable()
+        await MainActor.run { self.iCloudAvailable = available }
+    }
+
+    private func submitAndFetchRankings() async {
+        let score = vibeScore.total
+        let dailyKey = dayString(Date())
+
+        var cal = Calendar(identifier: .gregorian)
+        cal.timeZone = TimeZone.current
+        let weekOfYear = cal.component(.weekOfYear, from: Date())
+        let year = cal.component(.yearForWeekOfYear, from: Date())
+        let weeklyKey = "\(year)-W\(String(format: "%02d", weekOfYear))"
+
+        // Submit daily and weekly scores, then fetch rankings
+        do {
+            async let dailySubmit: () = RankingService.shared.submitScore(score, periodType: "daily", periodKey: dailyKey)
+            async let weeklySubmit: () = RankingService.shared.submitScore(score, periodType: "weekly", periodKey: weeklyKey)
+            let _ = try await (dailySubmit, weeklySubmit)
+
+            async let dailyResult = RankingService.shared.fetchRanking(myScore: score, periodType: "daily", periodKey: dailyKey)
+            async let weeklyResult = RankingService.shared.fetchRanking(myScore: score, periodType: "weekly", periodKey: weeklyKey)
+
+            let (daily, weekly) = try await (dailyResult, weeklyResult)
+
+            let prevDailyRank = UserDefaults.standard.object(forKey: "prevDailyRank_\(dailyKey)") as? Int
+            let prevWeeklyRank = UserDefaults.standard.object(forKey: "prevWeeklyRank_\(weeklyKey)") as? Int
+
+            await MainActor.run {
+                self.dailyRanking = RankingResult(
+                    rank: daily.rank, total: daily.total, percentile: daily.percentile,
+                    previousRank: prevDailyRank, periodType: "daily", periodKey: dailyKey
+                )
+                self.weeklyRanking = RankingResult(
+                    rank: weekly.rank, total: weekly.total, percentile: weekly.percentile,
+                    previousRank: prevWeeklyRank, periodType: "weekly", periodKey: weeklyKey
+                )
+                UserDefaults.standard.set(daily.rank, forKey: "prevDailyRank_\(dailyKey)")
+                UserDefaults.standard.set(weekly.rank, forKey: "prevWeeklyRank_\(weeklyKey)")
+            }
+        } catch {
+            print("VibeCheck: Ranking error: \(error.localizedDescription)")
+        }
     }
 
     private func scheduleRefresh() {

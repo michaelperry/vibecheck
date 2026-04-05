@@ -26,6 +26,24 @@ struct SettingsView: View {
                 }
             }
 
+            Section("Rankings") {
+                Toggle("Participate in anonymous rankings", isOn: $store.rankingsEnabled)
+                Text("Only your composite VibeScore (a single number) is shared anonymously. No activity details, usernames, or API keys are ever transmitted.")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+
+                if store.rankingsEnabled {
+                    HStack {
+                        Circle()
+                            .fill(store.iCloudAvailable ? Color.green : Color.red)
+                            .frame(width: 8, height: 8)
+                        Text(store.iCloudAvailable ? "iCloud connected" : "iCloud not available")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                }
+            }
+
             Section {
                 Button("Refresh Now") {
                     Task { await store.refreshAll() }
@@ -33,6 +51,6 @@ struct SettingsView: View {
             }
         }
         .formStyle(.grouped)
-        .frame(width: 400, height: 300)
+        .frame(width: 400, height: 380)
     }
 }
