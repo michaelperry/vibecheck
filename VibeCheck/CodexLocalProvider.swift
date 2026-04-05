@@ -14,8 +14,7 @@ struct CodexLocalProvider: ActivityProvider {
 
 enum CodexLocalReader {
 
-    private static let codexDir = FileManager.default.homeDirectoryForCurrentUser
-        .appendingPathComponent(".codex")
+    private static let codexDir = RealHome.appending(".codex")
     private static let sessionsDir = codexDir.appendingPathComponent("sessions")
     private static let dbPath = codexDir.appendingPathComponent("state_5.sqlite").path
 

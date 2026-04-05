@@ -15,10 +15,8 @@ struct CursorLocalProvider: ActivityProvider {
 
 enum CursorLocalReader {
 
-    private static let cursorAppSupport = FileManager.default.homeDirectoryForCurrentUser
-        .appendingPathComponent("Library/Application Support/Cursor")
-    private static let cursorHome = FileManager.default.homeDirectoryForCurrentUser
-        .appendingPathComponent(".cursor")
+    private static let cursorAppSupport = RealHome.appending("Library/Application Support/Cursor")
+    private static let cursorHome = RealHome.appending(".cursor")
 
     /// Read Cursor usage from local storage.
     static func readUsage() -> CursorLocalProvider {

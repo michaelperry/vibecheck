@@ -15,8 +15,7 @@ struct CopilotLocalProvider: ActivityProvider {
 
 enum CopilotLocalReader {
 
-    private static let vscodeAppSupport = FileManager.default.homeDirectoryForCurrentUser
-        .appendingPathComponent("Library/Application Support/Code")
+    private static let vscodeAppSupport = RealHome.appending("Library/Application Support/Code")
     private static let copilotChatStorage = vscodeAppSupport
         .appendingPathComponent("User/globalStorage/github.copilot-chat")
     private static let copilotStorage = vscodeAppSupport

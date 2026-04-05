@@ -14,8 +14,7 @@ struct ClaudeLocalProvider: ActivityProvider {
 
 enum ClaudeLocalReader {
 
-    private static let claudeDir = FileManager.default.homeDirectoryForCurrentUser
-        .appendingPathComponent(".claude")
+    private static let claudeDir = RealHome.appending(".claude")
 
     private static let projectsDir = claudeDir.appendingPathComponent("projects")
 
