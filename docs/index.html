@@ -839,6 +839,20 @@
         <div class="email-note">Join <span id="signup-count">early</span> vibe coders on the leaderboard</div>
     </div>
 
+    <!-- Challenge a Viber -->
+    <div class="email-section" style="margin-top: 40px;">
+        <h2>Think you code harder than your friends?</h2>
+        <p class="sub">Challenge them. Send the link. Let the vibes decide.</p>
+        <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+            <a href="https://twitter.com/intent/tweet?text=I%27m%20on%20the%20VibeWars%20leaderboard.%20Think%20you%20can%20out-vibe%20me%3F%20%F0%9F%94%A5%0A%0Ahttps%3A%2F%2Fvibewars.dev" target="_blank" class="download-btn" style="background: var(--purple); font-size: 13px; padding: 12px 24px;">
+                Challenge on X
+            </a>
+            <button onclick="navigator.clipboard.writeText('I\'m on the VibeWars leaderboard. Think you can out-vibe me? 🔥\nhttps://vibewars.dev'); this.textContent='Copied!'; setTimeout(()=>this.textContent='Copy Link', 2000);" class="download-btn" style="background: var(--surface); color: var(--text); border: 1px solid var(--border); font-size: 13px; padding: 12px 24px;">
+                Copy Link
+            </button>
+        </div>
+    </div>
+
     <!-- Download -->
     <div class="download-section">
         <a href="https://github.com/michaelperry/vibecheck/releases" class="download-btn">
