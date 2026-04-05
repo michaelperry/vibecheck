@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VibeCheck — Know your vibe. Own the leaderboard.</title>
+    <meta name="description" content="A macOS menu bar app that tracks your developer productivity across GitHub, Claude Code, Codex, Cursor, and Copilot. See where you rank against every other vibe coder.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0a0a0a;
+            --surface: #141414;
+            --border: #2a2a2a;
+            --text: #e0e0e0;
+            --dim: #666;
+            --green: #1D9E75;
+            --purple: #7F77DD;
+            --orange: #EF9F27;
+            --red: #e55;
+            --prompt: #1D9E75;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'JetBrains Mono', monospace;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* Terminal window */
+        .terminal {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            margin: 60px auto 0;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+        }
+
+        .terminal-bar {
+            background: #1a1a1a;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .terminal-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+        .terminal-dot.red { background: #ff5f57; }
+        .terminal-dot.yellow { background: #febc2e; }
+        .terminal-dot.green { background: #28c840; }
+
+        .terminal-title {
+            flex: 1;
+            text-align: center;
+            color: var(--dim);
+            font-size: 13px;
+        }
+
+        .terminal-body {
+            padding: 32px;
+            font-size: 14px;
+        }
+
+        .line {
+            margin-bottom: 4px;
+            opacity: 0;
+            animation: typeLine 0.3s ease forwards;
+        }
+
+        .line .prompt { color: var(--prompt); }
+        .line .cmd { color: #fff; font-weight: 600; }
+        .line .flag { color: var(--purple); }
+        .line .value { color: var(--orange); }
+        .line .comment { color: var(--dim); }
+        .line .output { color: var(--text); }
+        .line .success { color: var(--green); }
+        .line .fire { color: var(--orange); }
+
+        .line:nth-child(1) { animation-delay: 0.2s; }
+        .line:nth-child(2) { animation-delay: 0.6s; }
+        .line:nth-child(3) { animation-delay: 0.9s; }
+        .line:nth-child(4) { animation-delay: 1.2s; }
+        .line:nth-child(5) { animation-delay: 1.5s; }
+        .line:nth-child(6) { animation-delay: 1.8s; }
+        .line:nth-child(7) { animation-delay: 2.1s; }
+        .line:nth-child(8) { animation-delay: 2.4s; }
+        .line:nth-child(9) { animation-delay: 2.7s; }
+        .line:nth-child(10) { animation-delay: 3.0s; }
+        .line:nth-child(11) { animation-delay: 3.3s; }
+        .line:nth-child(12) { animation-delay: 3.6s; }
+        .line:nth-child(13) { animation-delay: 3.9s; }
+        .line:nth-child(14) { animation-delay: 4.2s; }
+        .line:nth-child(15) { animation-delay: 4.5s; }
+
+        @keyframes typeLine {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .cursor-blink {
+            display: inline-block;
+            width: 8px;
+            height: 16px;
+            background: var(--green);
+            animation: blink 1s step-end infinite;
+            vertical-align: middle;
+            margin-left: 2px;
+        }
+
+        @keyframes blink {
+            50% { opacity: 0; }
+        }
+
+        /* Sections below terminal */
+        .section {
+            margin-top: 80px;
+        }
+
+        .section h2 {
+            font-size: 16px;
+            color: var(--dim);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 24px;
+        }
+
+        .section h2::before {
+            content: "## ";
+            color: var(--purple);
+        }
+
+        /* Feature grid */
+        .features {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .feature {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+        }
+
+        .feature .emoji {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+
+        .feature h3 {
+            font-size: 14px;
+            color: #fff;
+            margin-bottom: 6px;
+        }
+
+        .feature p {
+            font-size: 12px;
+            color: var(--dim);
+            line-height: 1.5;
+        }
+
+        /* Scoring table */
+        .score-table {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .score-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 20px;
+            border-bottom: 1px solid var(--border);
+            font-size: 13px;
+        }
+
+        .score-row:last-child { border-bottom: none; }
+
+        .score-row .label { color: var(--text); }
+        .score-row .pts { color: var(--orange); font-weight: 600; }
+        .score-row .cap { color: var(--dim); }
+
+        /* Tools */
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+
+        .tool {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .tool .icon { font-size: 28px; margin-bottom: 8px; }
+        .tool .name { font-size: 12px; color: #fff; font-weight: 600; }
+        .tool .status { font-size: 11px; color: var(--green); margin-top: 4px; }
+
+        /* Download */
+        .download-section {
+            text-align: center;
+            margin: 80px 0 40px;
+        }
+
+        .download-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            background: var(--green);
+            color: #000;
+            padding: 16px 40px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 15px;
+            font-weight: 700;
+            transition: all 0.2s;
+            border: none;
+            cursor: pointer;
+        }
+
+        .download-btn:hover {
+            background: #24b886;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(29, 158, 117, 0.3);
+        }
+
+        .download-note {
+            margin-top: 12px;
+            font-size: 12px;
+            color: var(--dim);
+        }
+
+        .or-brew {
+            margin-top: 24px;
+            font-size: 13px;
+            color: var(--dim);
+        }
+
+        .or-brew code {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            padding: 6px 14px;
+            border-radius: 6px;
+            color: var(--green);
+            font-size: 13px;
+        }
+
+        /* Privacy */
+        .privacy-box {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 24px;
+            font-size: 13px;
+        }
+
+        .privacy-box h3 {
+            color: var(--green);
+            margin-bottom: 12px;
+            font-size: 14px;
+        }
+
+        .privacy-box ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .privacy-box li {
+            padding: 4px 0;
+            color: var(--dim);
+        }
+
+        .privacy-box li::before {
+            content: "~ ";
+            color: var(--green);
+        }
+
+        .privacy-box li.no::before {
+            content: "x ";
+            color: var(--red);
+        }
+
+        /* Footer */
+        footer {
+            border-top: 1px solid var(--border);
+            margin-top: 80px;
+            padding: 40px 0;
+            text-align: center;
+        }
+
+        .built-with {
+            font-size: 13px;
+            color: var(--dim);
+            line-height: 1.8;
+        }
+
+        .built-with a {
+            color: var(--purple);
+            text-decoration: none;
+        }
+
+        .built-with a:hover {
+            text-decoration: underline;
+        }
+
+        .built-with .heart { color: var(--orange); }
+
+        .footer-note {
+            margin-top: 16px;
+            font-size: 11px;
+            color: #333;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .features { grid-template-columns: 1fr; }
+            .tools-grid { grid-template-columns: repeat(2, 1fr); }
+            .terminal-body { padding: 20px; font-size: 12px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <!-- Terminal hero -->
+    <div class="terminal">
+        <div class="terminal-bar">
+            <div class="terminal-dot red"></div>
+            <div class="terminal-dot yellow"></div>
+            <div class="terminal-dot green"></div>
+            <div class="terminal-title">vibecheck &mdash; zsh</div>
+            <div style="width: 52px"></div>
+        </div>
+        <div class="terminal-body">
+            <div class="line"><span class="prompt">~</span> <span class="cmd">vibecheck</span> <span class="flag">--status</span></div>
+            <div class="line"><br></div>
+            <div class="line"><span class="fire">🔥 Cooking</span> <span class="comment">— you're absolutely ripping today</span></div>
+            <div class="line"><br></div>
+            <div class="line"><span class="comment">  github</span>    <span class="output">14 commits today</span>  <span class="comment">·</span>  <span class="output">47 this week</span>  <span class="comment">·</span>  <span class="success">12d streak</span></div>
+            <div class="line"><span class="comment">  claude</span>    <span class="output">142.8K tokens</span>   <span class="comment">·</span>  <span class="output">38 messages</span>  <span class="comment">·</span>  <span class="output">6 sessions</span></div>
+            <div class="line"><span class="comment">  codex</span>     <span class="output">51.2K tokens</span>    <span class="comment">·</span>  <span class="output">12 messages</span></div>
+            <div class="line"><br></div>
+            <div class="line"><span class="comment">  vibescore</span> <span class="value" style="font-size:16px; font-weight:700;">78</span><span class="comment">/100</span></div>
+            <div class="line"><span class="comment">  rank</span>      <span class="success">#40</span> <span class="comment">of 1,204</span>  <span class="comment">·</span>  <span class="value">Top 3%</span></div>
+            <div class="line"><span class="comment">  </span><span class="success">↑ You moved up 2 spots today</span></div>
+            <div class="line"><br></div>
+            <div class="line"><span class="comment">  outvibing</span> <span class="value">97% of developers</span> <span class="comment">today</span></div>
+            <div class="line"><br></div>
+            <div class="line"><span class="prompt">~</span> <span class="cursor-blink"></span></div>
+        </div>
+    </div>
+
+    <!-- What is it -->
+    <div class="section">
+        <h2>What is VibeCheck</h2>
+        <p style="color: var(--dim); font-size: 14px; max-width: 600px; line-height: 1.8;">
+            A macOS menu bar app that tracks your coding activity across GitHub and AI tools,
+            computes a daily VibeScore, and ranks you anonymously against every other developer using it.
+            <br><br>
+            Think Strava, but for vibe coding.
+        </p>
+    </div>
+
+    <!-- Features -->
+    <div class="section">
+        <h2>Features</h2>
+        <div class="features">
+            <div class="feature">
+                <div class="emoji">📊</div>
+                <h3>VibeScore 0&ndash;100</h3>
+                <p>Composite score from commits, AI usage, streaks, and tool diversity. Capped inputs prevent gaming.</p>
+            </div>
+            <div class="feature">
+                <div class="emoji">🏆</div>
+                <h3>Anonymous Leaderboard</h3>
+                <p>See your daily and weekly rank. "You moved up 3 spots" / "Outvibing 97% of devs today."</p>
+            </div>
+            <div class="feature">
+                <div class="emoji">🔍</div>
+                <h3>Zero Config Detection</h3>
+                <p>Reads local files automatically. No API keys needed for AI tools. Just install and go.</p>
+            </div>
+            <div class="feature">
+                <div class="emoji">🔒</div>
+                <h3>Privacy First</h3>
+                <p>Only a single number (your score) leaves your machine. No code, no prompts, no usernames.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scoring -->
+    <div class="section">
+        <h2>How Scoring Works</h2>
+        <div class="score-table">
+            <div class="score-row">
+                <span class="label">Git Commits</span>
+                <span class="pts">35 pts</span>
+                <span class="cap">caps at 20 commits</span>
+            </div>
+            <div class="score-row">
+                <span class="label">AI Tokens (all tools)</span>
+                <span class="pts">35 pts</span>
+                <span class="cap">caps at 500K tokens</span>
+            </div>
+            <div class="score-row">
+                <span class="label">Streak</span>
+                <span class="pts">15 pts</span>
+                <span class="cap">caps at 14 days</span>
+            </div>
+            <div class="score-row">
+                <span class="label">Tool Diversity</span>
+                <span class="pts">15 pts</span>
+                <span class="cap">caps at 3 tools</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Supported tools -->
+    <div class="section">
+        <h2>Supported Tools</h2>
+        <div class="tools-grid">
+            <div class="tool">
+                <div class="icon">🟣</div>
+                <div class="name">Claude Code</div>
+                <div class="status">auto-detected</div>
+            </div>
+            <div class="tool">
+                <div class="icon">🟢</div>
+                <div class="name">Codex</div>
+                <div class="status">auto-detected</div>
+            </div>
+            <div class="tool">
+                <div class="icon">🔵</div>
+                <div class="name">Cursor</div>
+                <div class="status">auto-detected</div>
+            </div>
+            <div class="tool">
+                <div class="icon">⚫</div>
+                <div class="name">Copilot</div>
+                <div class="status">auto-detected</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Privacy -->
+    <div class="section">
+        <h2>Privacy</h2>
+        <div class="privacy-box">
+            <h3>What leaves your machine:</h3>
+            <ul>
+                <li>A single VibeScore number (0&ndash;100)</li>
+                <li>A hashed anonymous ID (not reversible)</li>
+            </ul>
+            <br>
+            <h3 style="color: var(--red);">What never leaves your machine:</h3>
+            <ul>
+                <li class="no">Your code, commits, or repo names</li>
+                <li class="no">AI prompts, messages, or conversations</li>
+                <li class="no">API keys, tokens, or credentials</li>
+                <li class="no">Your username, email, or identity</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Download -->
+    <div class="download-section">
+        <a href="https://github.com/michaelperry/vibecheck/releases" class="download-btn">
+            Download for macOS
+        </a>
+        <div class="download-note">macOS 13+ &middot; Apple Silicon & Intel</div>
+        <div class="or-brew">
+            or &nbsp; <code>brew install --cask vibecheck</code> &nbsp; <span style="color: var(--dim);">(coming soon)</span>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="built-with">
+            Built from scratch in one session by<br>
+            <a href="https://github.com/michaelperry">Michael Perry</a> <span class="heart">&</span> <a href="https://claude.ai">Claude</a> <span class="comment">(Opus 4.6)</span>
+            <br><br>
+            <span class="comment">The entire app &mdash; every line of Swift, the Supabase backend,<br>
+            the scoring engine, this landing page &mdash; was vibe coded together.</span>
+        </div>
+        <div class="footer-note">
+            <a href="https://github.com/michaelperry/vibecheck" style="color: #333; text-decoration: none;">github.com/michaelperry/vibecheck</a>
+        </div>
+    </footer>
+
+</div>
+
+</body>
+</html>
