@@ -100,6 +100,28 @@ class AppStore: ObservableObject {
         self.claudeApiKey = KeychainHelper.load("claudeApiKey")
         self.githubUsername = UserDefaults.standard.string(forKey: "githubUsername") ?? ""
         self.rankingsEnabled = UserDefaults.standard.object(forKey: "rankingsEnabled") as? Bool ?? true
+
+        // Migrate from UserDefaults (standard or sandbox container) to Keychain
+        if self.githubToken.isEmpty {
+            let legacy = Self.loadLegacyDefault("githubToken")
+            if !legacy.isEmpty {
+                self.githubToken = legacy
+                KeychainHelper.save(legacy, for: "githubToken")
+                print("VibeCheck: Migrated GitHub token to Keychain")
+            }
+        }
+        if self.claudeApiKey.isEmpty {
+            let legacy = Self.loadLegacyDefault("claudeApiKey")
+            if !legacy.isEmpty {
+                self.claudeApiKey = legacy
+                KeychainHelper.save(legacy, for: "claudeApiKey")
+                print("VibeCheck: Migrated Claude API key to Keychain")
+            }
+        }
+
+        print("VibeCheck: Init — GitHub token: \(githubToken.isEmpty ? "EMPTY" : "set (\(githubToken.prefix(4))...)"), username: \(githubUsername)")
+        print("VibeCheck: Real home: \(RealHome.path)")
+
         loadPersistedData()
         scheduleRefresh()
         Task {
@@ -432,6 +454,21 @@ class AppStore: ObservableObject {
         f.dateFormat = "yyyy-MM-dd"
         f.timeZone = TimeZone.current
         return f.string(from: date)
+    }
+
+    /// Load a value from UserDefaults, checking both standard and sandbox container locations.
+    private static func loadLegacyDefault(_ key: String) -> String {
+        // Standard location
+        if let val = UserDefaults.standard.string(forKey: key), !val.isEmpty {
+            return val
+        }
+        // Sandbox container location (from when app ran sandboxed)
+        let containerPlist = RealHome.appending("Library/Containers/com.michaelperry.VibeCheck/Data/Library/Preferences/com.michaelperry.VibeCheck.plist")
+        if let dict = NSDictionary(contentsOf: containerPlist),
+           let val = dict[key] as? String, !val.isEmpty {
+            return val
+        }
+        return ""
     }
 
     private func loadActiveDays() -> Set<String> { Set(UserDefaults.standard.stringArray(forKey: "activeDays") ?? []) }

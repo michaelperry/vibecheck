@@ -3,18 +3,8 @@
 <plist version="1.0">
 <dict>
 	<key>com.apple.security.app-sandbox</key>
-	<true/>
+	<false/>
 	<key>com.apple.security.network.client</key>
 	<true/>
-	<key>com.apple.security.temporary-exception.files.home-relative-path.read-only</key>
-	<array>
-		<string>.claude/</string>
-		<string>.codex/</string>
-		<string>.cursor/</string>
-		<string>.vscode/</string>
-		<string>Library/Application Support/Cursor/</string>
-		<string>Library/Application Support/Code/</string>
-		<string>Library/Application Support/Codex/</string>
-	</array>
 </dict>
 </plist>
