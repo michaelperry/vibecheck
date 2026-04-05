@@ -11,10 +11,8 @@ actor RankingService {
     private let supabaseAnonKey: String
 
     private init() {
-        self.supabaseURL = UserDefaults.standard.string(forKey: "supabaseURL")
-            ?? "YOUR_SUPABASE_URL"
-        self.supabaseAnonKey = UserDefaults.standard.string(forKey: "supabaseAnonKey")
-            ?? "YOUR_SUPABASE_ANON_KEY"
+        self.supabaseURL = "https://wofxaqovazcxmcnmgrjg.supabase.co"
+        self.supabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndvZnhhcW92YXpjeG1jbm1ncmpnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0MDQ2NTEsImV4cCI6MjA5MDk4MDY1MX0.hZGBavn5FSudQXd1oTL40-Bbuu9ece77jzMOzDAuVpY"
     }
 
     /// Reconfigure with new Supabase credentials (called from settings or bundled config).
