@@ -102,7 +102,7 @@ struct MenuBarView: View {
                 HStack {
                     StatBox(label: "Score", value: "\(store.vibeScore.rounded)")
                     if let ranking = store.dailyRanking {
-                        StatBox(label: "Rank", value: "#\(ranking.rank)")
+                        StatBox(label: "Rank", value: "#\(ranking.rank) / \(ranking.total)")
                         StatBox(label: "Percentile", value: ranking.percentileText)
                     } else {
                         StatBox(label: "Rank", value: "—")
