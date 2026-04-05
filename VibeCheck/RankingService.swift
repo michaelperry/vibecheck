@@ -115,15 +115,19 @@ actor RankingService {
 
     func isAvailable() async -> Bool {
         guard isConfigured else { return false }
-        // Quick health check
-        guard let url = URL(string: "\(supabaseURL)/rest/v1/") else { return false }
+        // Health check against the score_entries table
+        guard let url = URL(string: "\(supabaseURL)/rest/v1/score_entries?select=count&limit=0") else { return false }
         var request = URLRequest(url: url)
         request.setValue(supabaseAnonKey, forHTTPHeaderField: "apikey")
+        request.setValue("Bearer \(supabaseAnonKey)", forHTTPHeaderField: "Authorization")
         request.timeoutInterval = 5
         do {
             let (_, response) = try await URLSession.shared.data(for: request)
-            return (response as? HTTPURLResponse)?.statusCode == 200
+            let code = (response as? HTTPURLResponse)?.statusCode ?? 0
+            print("VibeCheck: Supabase health check: \(code)")
+            return code == 200
         } catch {
+            print("VibeCheck: Supabase health check failed: \(error.localizedDescription)")
             return false
         }
     }
