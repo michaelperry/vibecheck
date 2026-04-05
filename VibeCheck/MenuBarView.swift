@@ -137,6 +137,17 @@ struct MenuBarView: View {
                         .foregroundColor(.secondary)
                 }
                 Spacer()
+
+                Button {
+                    let message = "I'm on the VibeWars leaderboard. Think you can out-vibe me? \u{1F525}\nhttps://vibewars.dev"
+                    NSPasteboard.general.clearContents()
+                    NSPasteboard.general.setString(message, forType: .string)
+                } label: {
+                    Text("Challenge")
+                        .font(.caption)
+                }
+                .buttonStyle(.borderless)
+
                 Button("Refresh") {
                     Task { await store.refreshAll() }
                 }
