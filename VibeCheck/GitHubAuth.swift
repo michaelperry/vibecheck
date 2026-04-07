@@ -9,8 +9,8 @@ class GitHubAuth {
     /// - Set "Device flow" to enabled in the OAuth App settings.
     static let clientID = "Ov23lig3fPiaXgtrHFLZ"
 
-    /// Scopes requested from the user.
-    static let scopes = "repo read:user"
+    /// Scopes requested from the user. Read-only — we only need to see events and profile.
+    static let scopes = "read:user"
 
     struct DeviceCodeResponse {
         let deviceCode: String
