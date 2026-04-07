@@ -45,6 +45,9 @@ class AppStore: ObservableObject {
     @Published var aiAssistedCommitsToday: Int = 0
     @Published var humanCommitsToday: Int = 0
 
+    @Published var availableRepos: [String] = []
+    @Published var excludedRepos: Set<String> = Set(UserDefaults.standard.stringArray(forKey: "excludedRepos") ?? [])
+
     @Published var currentStreak: Int = 0
     @Published var longestStreak: Int = 0
     @Published var activeDays: Set<String> = []
@@ -230,6 +233,20 @@ class AppStore: ObservableObject {
         githubAuthError = nil
     }
 
+    func toggleRepo(_ name: String) {
+        if excludedRepos.contains(name) {
+            excludedRepos.remove(name)
+        } else {
+            excludedRepos.insert(name)
+        }
+        UserDefaults.standard.set(Array(excludedRepos), forKey: "excludedRepos")
+        Task { await refreshAll() }
+    }
+
+    func isRepoEnabled(_ name: String) -> Bool {
+        !excludedRepos.contains(name)
+    }
+
     func refreshAll() async {
         await withTaskGroup(of: Void.self) { group in
             group.addTask { await self.fetchGitHub() }
@@ -359,6 +376,7 @@ class AppStore: ObservableObject {
             var todayList: [CommitItem] = []
             var weekTotal = 0
             var repoMap: [String: Int] = [:]
+            var allRepoNames: Set<String> = []
             var activeDaySet: Set<String> = loadActiveDays()
 
             for event in events {
@@ -373,12 +391,20 @@ class AppStore: ObservableObject {
                 let commitCount = payload["size"] as? Int ?? (payload["commits"] as? [[String: Any]])?.count ?? 1
                 let commitMessages = payload["commits"] as? [[String: Any]] ?? []
 
-                if createdAt >= weekStart {
-                    weekTotal += commitCount
-                    repoMap[repoName, default: 0] += commitCount
-                    activeDaySet.insert(dayString(createdAt))
+                // Track all discovered repos
+                allRepoNames.insert(repoName)
 
-                    if createdAt >= todayStart {
+                // Skip excluded repos for counting
+                let isExcluded = self.excludedRepos.contains(repoName)
+
+                if createdAt >= weekStart {
+                    if !isExcluded {
+                        weekTotal += commitCount
+                        activeDaySet.insert(dayString(createdAt))
+                    }
+                    repoMap[repoName, default: 0] += commitCount
+
+                    if createdAt >= todayStart && !isExcluded {
                         if commitMessages.isEmpty {
                             let shortRepo = repoName.components(separatedBy: "/").last ?? repoName
                             todayList.append(CommitItem(
@@ -404,8 +430,9 @@ class AppStore: ObservableObject {
                 }
             }
 
-            let sortedRepos = repoMap.map { RepoCount(name: $0.key.components(separatedBy: "/").last ?? $0.key, count: $0.value) }
+            let sortedRepos = repoMap.map { RepoCount(name: $0.key, count: $0.value) }
                 .sorted { $0.count > $1.count }
+            let sortedAvailableRepos = repoMap.sorted { $0.value > $1.value }.map { $0.key }
             let (streak, longest) = calculateStreaks(activeDays: activeDaySet)
 
             let aiCount = todayList.filter { $0.isAIAssisted }.count
@@ -416,6 +443,7 @@ class AppStore: ObservableObject {
                 self.commitsWeek = weekTotal
                 self.todayCommits = todayList.sorted { $0.time > $1.time }
                 self.repoCommits = sortedRepos
+                self.availableRepos = sortedAvailableRepos
                 self.activeDays = activeDaySet
                 self.currentStreak = streak
                 self.longestStreak = longest

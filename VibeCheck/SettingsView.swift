@@ -117,6 +117,62 @@ struct SettingsView: View {
                 .font(.caption)
             }
 
+            Section("Repositories") {
+                if store.isGitHubAuthenticated {
+                    if store.availableRepos.isEmpty {
+                        Text("No repos discovered yet. Pull to refresh.")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    } else {
+                        HStack {
+                            Button("Select All") {
+                                for repo in store.availableRepos {
+                                    if !store.isRepoEnabled(repo) {
+                                        store.toggleRepo(repo)
+                                    }
+                                }
+                            }
+                            .font(.caption)
+                            Button("Deselect All") {
+                                for repo in store.availableRepos {
+                                    if store.isRepoEnabled(repo) {
+                                        store.toggleRepo(repo)
+                                    }
+                                }
+                            }
+                            .font(.caption)
+                        }
+
+                        ForEach(store.availableRepos, id: \.self) { repoName in
+                            let shortName = repoName.components(separatedBy: "/").last ?? repoName
+                            let weekCount = store.repoCommits.first(where: { $0.name == repoName })?.count ?? 0
+                            HStack {
+                                Toggle(isOn: Binding(
+                                    get: { store.isRepoEnabled(repoName) },
+                                    set: { _ in store.toggleRepo(repoName) }
+                                )) {
+                                    HStack {
+                                        Text(shortName)
+                                            .font(.caption)
+                                            .fontWeight(.medium)
+                                        Spacer()
+                                        Text("\(weekCount) this week")
+                                            .font(.caption)
+                                            .foregroundColor(.secondary)
+                                    }
+                                }
+                                .toggleStyle(.switch)
+                                .controlSize(.small)
+                            }
+                        }
+                    }
+                } else {
+                    Text("Sign in to GitHub to see your repos")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+            }
+
             Section("Rankings") {
                 Toggle("Participate in anonymous rankings", isOn: $store.rankingsEnabled)
                 Text("Only your composite VibeScore (a single number 0–100) is shared anonymously. No activity details, usernames, or API keys are ever transmitted.")
@@ -142,7 +198,7 @@ struct SettingsView: View {
             }
         }
         .formStyle(.grouped)
-        .frame(width: 400, height: 420)
+        .frame(width: 400, height: 580)
     }
 }
 
