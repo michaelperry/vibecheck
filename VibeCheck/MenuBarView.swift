@@ -12,6 +12,12 @@ struct MenuBarView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
+            // Rank change alert
+            if let event = store.latestRankChange {
+                RankChangeBanner(event: event)
+                    .transition(.move(edge: .top).combined(with: .opacity))
+            }
+
             // Vibe header
             HStack {
                 Text(vibe.emoji)

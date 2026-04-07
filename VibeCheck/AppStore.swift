@@ -77,6 +77,7 @@ class AppStore: ObservableObject {
         didSet { UserDefaults.standard.set(rankingsEnabled, forKey: "rankingsEnabled") }
     }
     @Published var rankingServiceAvailable: Bool = false
+    @Published var latestRankChange: RankChangeEvent? = nil
 
     var activityProviders: [ActivityProvider] {
         var providers: [ActivityProvider] = []
@@ -150,6 +151,7 @@ class AppStore: ObservableObject {
             await refreshAll()
         }
         UpdateChecker.shared.startPeriodicChecks()
+        RankNotifier.requestPermission()
     }
 
     var isGitHubAuthenticated: Bool {
@@ -324,9 +326,35 @@ class AppStore: ObservableObject {
                 )
                 UserDefaults.standard.set(daily.rank, forKey: "prevDailyRank_\(dailyKey)")
                 UserDefaults.standard.set(weekly.rank, forKey: "prevWeeklyRank_\(weeklyKey)")
+
+                // Detect rank changes and fire alerts
+                if let prevRank = prevDailyRank {
+                    let delta = prevRank - daily.rank
+                    if delta > 0 {
+                        let event = RankChangeEvent(type: .movedUp(delta), newRank: daily.rank, total: daily.total, timestamp: Date())
+                        self.latestRankChange = event
+                        RankNotifier.sendSystemNotification(event: event)
+                        self.autoHideRankChange()
+                    } else if delta < 0 {
+                        let event = RankChangeEvent(type: .movedDown(abs(delta)), newRank: daily.rank, total: daily.total, timestamp: Date())
+                        self.latestRankChange = event
+                        RankNotifier.sendSystemNotification(event: event)
+                        self.autoHideRankChange()
+                    }
+                } else if daily.total > 0 {
+                    let event = RankChangeEvent(type: .newRank, newRank: daily.rank, total: daily.total, timestamp: Date())
+                    self.latestRankChange = event
+                    self.autoHideRankChange()
+                }
             }
         } catch {
             print("VibeWars: Ranking error: \(error.localizedDescription)")
+        }
+    }
+
+    private func autoHideRankChange() {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 6) {
+            self.latestRankChange = nil
         }
     }
 
