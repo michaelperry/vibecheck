@@ -91,6 +91,20 @@ struct SettingsView: View {
                         .foregroundColor(.red)
                         .font(.caption)
                 }
+
+                Toggle("Include private repos", isOn: $store.privateReposEnabled)
+                    .onChange(of: store.privateReposEnabled) { _ in
+                        if store.isGitHubAuthenticated {
+                            // Need to re-authenticate with new scope
+                            store.signOutGitHub()
+                            store.signInWithGitHub()
+                        }
+                    }
+                Text(store.privateReposEnabled
+                     ? "Repo scope granted — private commits are tracked. We never read your code."
+                     : "Only public activity is tracked. Enable to count private repo commits.")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
             }
 
             Section("AI Tools") {

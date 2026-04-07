@@ -9,8 +9,10 @@ class GitHubAuth {
     /// - Set "Device flow" to enabled in the OAuth App settings.
     static let clientID = "Ov23lig3fPiaXgtrHFLZ"
 
-    /// Scopes requested from the user. Read-only — we only need to see events and profile.
-    static let scopes = "read:user"
+    /// Default scope — read-only, public events only.
+    static let publicScopes = "read:user"
+    /// Extended scope — includes private repo commit tracking.
+    static let privateScopes = "repo read:user"
 
     struct DeviceCodeResponse {
         let deviceCode: String
@@ -37,10 +39,12 @@ class GitHubAuth {
     }
 
     /// Step 1: Request a device code from GitHub.
-    static func requestDeviceCode() async throws -> DeviceCodeResponse {
+    static func requestDeviceCode(includePrivateRepos: Bool = false) async throws -> DeviceCodeResponse {
         guard let url = URL(string: "https://github.com/login/device/code") else {
             throw AuthError.networkError("Invalid URL")
         }
+
+        let scopes = includePrivateRepos ? privateScopes : publicScopes
 
         var request = URLRequest(url: url)
         request.httpMethod = "POST"

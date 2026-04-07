@@ -63,6 +63,9 @@ class AppStore: ObservableObject {
     @Published var deviceUserCode: String? = nil
     @Published var deviceVerificationURI: String? = nil
     @Published var githubAuthError: String? = nil
+    @Published var privateReposEnabled: Bool {
+        didSet { UserDefaults.standard.set(privateReposEnabled, forKey: "privateReposEnabled") }
+    }
     private var authPollingTask: Task<Void, Never>? = nil
 
     // Scoring & Rankings
@@ -114,6 +117,7 @@ class AppStore: ObservableObject {
         self.claudeApiKey = KeychainHelper.load("claudeApiKey")
         self.githubUsername = UserDefaults.standard.string(forKey: "githubUsername") ?? ""
         self.rankingsEnabled = UserDefaults.standard.object(forKey: "rankingsEnabled") as? Bool ?? true
+        self.privateReposEnabled = UserDefaults.standard.bool(forKey: "privateReposEnabled")
 
         // Migrate from UserDefaults (standard or sandbox container) to Keychain
         if self.githubToken.isEmpty {
@@ -160,7 +164,7 @@ class AppStore: ObservableObject {
 
         authPollingTask = Task {
             do {
-                let deviceCode = try await GitHubAuth.requestDeviceCode()
+                let deviceCode = try await GitHubAuth.requestDeviceCode(includePrivateRepos: self.privateReposEnabled)
 
                 await MainActor.run {
                     self.deviceUserCode = deviceCode.userCode
