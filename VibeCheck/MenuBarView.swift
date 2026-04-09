@@ -91,27 +91,9 @@ struct MenuBarView: View {
                     StatBox(label: "Streak", value: "\(store.currentStreak)d")
                 }
 
-                if store.commitsToday > 0 {
-                    HStack(spacing: 4) {
-                        Text("\(store.humanCommitsToday) human")
-                            .font(.caption)
-                            .foregroundColor(.green)
-                        Text("\u{00B7}")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                        Text("\(store.aiAssistedCommitsToday) AI-assisted")
-                            .font(.caption)
-                            .foregroundColor(.purple)
-                    }
-                }
-
                 if !store.todayCommits.isEmpty {
                     ForEach(store.todayCommits.prefix(5)) { commit in
                         HStack(spacing: 4) {
-                            if commit.isAIAssisted {
-                                Text("\u{1F916}")
-                                    .font(.system(size: 10))
-                            }
                             Text(commit.message)
                                 .font(.caption)
                                 .lineLimit(1)
